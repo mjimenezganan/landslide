@@ -12,9 +12,9 @@ from subprocess import Popen
 from six import string_types
 from six.moves import configparser
 
-from . import utils
-from . import macro as macro_module
-from .parser import Parser
+from landslide import utils
+from landslide import macro as macro_module
+from landslide.parser import Parser
 
 
 BASE_DIR = os.path.dirname(__file__)
@@ -105,6 +105,9 @@ class Generator(object):
             self.add_user_css(config.get('css', []))
             self.add_user_js(config.get('js', []))
             self.linenos = self.linenos_check(config.get('linenos'))
+            self.author_name = config.get('author_name', '')
+            self.author_email = config.get('author_email', '')
+            self.author_affiliation = config.get('author_affiliation', '')
         else:
             self.source = source
             source_abspath = os.path.abspath(source)
@@ -414,6 +417,8 @@ class Generator(object):
                 self.add_toc_entry(u"-", 1, slide_number)
 
         return {'head_title': head_title, 'num_slides': str(self.num_slides),
+                'author_name': self.author_name, 'author_email': self.author_email,
+                'author_affiliation': self.author_affiliation,
                 'slides': slides, 'toc': self.toc, 'embed': self.embed,
                 'css': self.get_css(), 'js': self.get_js(),
                 'user_css': self.user_css, 'user_js': self.user_js,
@@ -464,6 +469,12 @@ class Generator(object):
         if raw_config.has_option('landslide', 'js'):
             config['js'] = raw_config.get('landslide', 'js')\
                 .replace('\r', '').split('\n')
+        if raw_config.has_option('author', 'name'):
+            config['author_name'] = raw_config.get('author', 'name')
+        if raw_config.has_option('author', 'affiliation'):
+            config['author_affiliation'] = raw_config.get('author', 'affiliation')
+        if raw_config.has_option('author', 'email'):
+            config['author_email'] = raw_config.get('author', 'email')
         return config
 
     def process_macros(self, content, source=None):
